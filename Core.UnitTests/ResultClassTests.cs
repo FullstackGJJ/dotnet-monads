@@ -85,7 +85,7 @@ namespace Core.UnitTests
                     switch (successResult.Status)
                     {
                         case ResultStatus.Success:
-                            Assert.IsTrue(true);
+                            Assert.Pass();
                             break;
                         case ResultStatus.Error:
                             Assert.Fail("Shouldn't have reached here on successResult status switch");
@@ -98,7 +98,7 @@ namespace Core.UnitTests
                             Assert.Fail("Shouldn't have reached here on errorResult status switch");
                             break;
                         case ResultStatus.Error:
-                            Assert.IsTrue(true);
+                            Assert.Pass();
                             break;
                     }
                 }
