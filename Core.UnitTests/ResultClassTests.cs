@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 
 namespace Core.UnitTests
 {
@@ -33,22 +34,109 @@ namespace Core.UnitTests
                     Assert.That(errorResult, Is.EqualTo("This correctly indicates failure"));
                 }
             }
+
+            [TestFixture]
+            public class MatchVoidReturn : Method
+            {
+                [Test]
+                public void Should_ManipulateClosure_When_ResultIsSuccessful()
+                {
+                    var referenceInt = 10;
+                    Result<int, string>.Succ(5)
+                        .Match(
+                            (successResult) => 
+                            {
+                                referenceInt += successResult;
+                            },
+                            (errorResult) => {}
+                        );
+
+                    var expectedInt = 15;
+                    Assert.That(referenceInt, Is.EqualTo(expectedInt));
+                }
+
+                [Test]
+                public void Should_ManipulateClosure_When_ResultErrors()
+                {
+                    var referenceString = "Hello Bob";
+                    Result<int, string>.Err("Hi Dave")
+                        .Match(
+                            (successResult) => { },
+                            (errorResult) => 
+                            {
+                                referenceString = $"{referenceString}, {errorResult}";
+                            }
+                        );
+
+                    var expectedString = "Hello Bob, Hi Dave";
+                    Assert.That(referenceString, Is.EqualTo(expectedString));
+                }
+            }
+
+            [TestFixture]
+            public class Status : Method
+            {
+                [Test]
+                public void Should_ReturnProperStatusToAllowSwitches_When_Accessed()
+                {
+                    var successResult = Result<int, string>.Succ(5);
+                    var errorResult = Result<int, string>.Err("Hello");
+
+                    switch (successResult.Status)
+                    {
+                        case ResultStatus.Success:
+                            Assert.IsTrue(true);
+                            break;
+                        case ResultStatus.Error:
+                            Assert.Fail("Shouldn't have reached here on successResult status switch");
+                            break;
+                    }
+
+                    switch (errorResult.Status)
+                    {
+                        case ResultStatus.Success:
+                            Assert.Fail("Shouldn't have reached here on errorResult status switch");
+                            break;
+                        case ResultStatus.Error:
+                            Assert.IsTrue(true);
+                            break;
+                    }
+                }
+            }
+
+            [TestFixture]
+            public class UnsafeResult : Method
+            {
+                [Test]
+                public void Should_ReturnCorrectResultingObject_When_AccessedCarefully()
+                {
+                    var successResult = Result<int, string>.Succ(5);
+                    var errorResult = Result<int, string>.Err("Error");
+
+
+                    if (successResult.UnsafeResult is int s)
+                    {
+                        Assert.That(s, Is.EqualTo(5));
+                    }
+                    else
+                    {
+                        Assert.Fail("Shouldn't have reached here with successResult.UnsafeResult");
+                    }
+                    
+                    if (errorResult.UnsafeResult is string message)
+                    {
+                        Assert.That(message, Is.EqualTo("Error"));
+                    }
+                    else
+                    {
+                        Assert.Fail("Shouldn't have reached here with errorResult.UnsafeResult");
+                    }
+                }
+            }
         }
 
         [TestFixture]
         public class ScenarioTests : ResultClassTests
-        {
-
-        }
-
-        [TestFixture]
-        public class MatchWithReturnMethodTests : ResultClassTests
-        {
-
-        }
-
-        [TestFixture]
-        public class MatchWithoutReturnMethodTests : ResultClassTests
         {
 
         }
